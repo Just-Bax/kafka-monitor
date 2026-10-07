@@ -1,6 +1,7 @@
 # kafka-monitor
 
-Read-only Kafka diagnostics for kafka-bulk-consumer modules. Run it manually once; read the
+Read-only Kafka diagnostics for kafka-bulk-consumer modules. Default schedule is every 5 minutes:
+disable the module after the first run completes. Read the
 `DIAG ...` lines in the module log (summary in the message, JSON in the description).
 
 ## Safety
