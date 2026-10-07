@@ -40,7 +40,7 @@ except ImportError:
     subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-r', 'requirements.txt'])
     os.execv(sys.executable, [sys.executable] + sys.argv)
 
-MODULE_VERSION = '1.0'
+MODULE_VERSION = '1.1'
 SECRET_WORDS = ('secret', 'password', 'key', 'token', 'cert', 'ca')
 
 _cert_files = []
@@ -295,9 +295,26 @@ def replay(diag, base, topic, start_offsets, profile_name, overrides, rp):
         fetch = {pid: {'fetch_state': p.get('fetch_state'), 'fetchq_cnt': p.get('fetchq_cnt'),
                        'fetchq_size': p.get('fetchq_size'), 'leader': p.get('leader')}
                  for pid, p in tparts.items() if pid != '-1'}
-        max_thr = max([b['throttle_max_ms'] or 0 for b in brokers.values()] or [0])
-        diag.info('client_stats', f'{topic} [{profile_name}]: max broker throttle {max_thr} ms',
-                  {'brokers': brokers, 'partitions': fetch})
+        # Throttle across EVERY stats window (5 s each), not only the last snapshot
+        series = {}
+        for raw in stats_box['all']:
+            snap = json.loads(raw)
+            for b in snap.get('brokers', {}).values():
+                if b.get('nodeid', -1) < 0:
+                    continue
+                series.setdefault(b.get('nodeid'), []).append((b.get('throttle') or {}).get('max') or 0)
+        windows = len(stats_box['all'])
+        per_broker = {nid: {'windows': len(v), 'throttled_windows': sum(1 for x in v if x > 0),
+                            'max_ms': max(v), 'avg_ms': round(statistics.mean(v), 1)}
+                      for nid, v in sorted(series.items())}
+        max_thr = max([v['max_ms'] for v in per_broker.values()] or [0])
+        thr_windows = max([v['throttled_windows'] for v in per_broker.values()] or [0])
+        diag.info('client_stats', f'{topic} [{profile_name}]: max broker throttle {max_thr} ms, '
+                                  f'throttled in up to {thr_windows}/{windows} stats windows, '
+                                  f'per broker {{id: max_ms}} '
+                                  f'{ {k: v["max_ms"] for k, v in per_broker.items()} }',
+                  {'throttle_per_broker': per_broker, 'last_snapshot_brokers': brokers,
+                   'partitions': fetch})
     return summary
 
 

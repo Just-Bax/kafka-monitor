@@ -3,3 +3,4 @@ settings_file_name = settings.json
 default_schedule = 0 0/5 * * * ?
 read_from_stdout = false
 1.0 = [25.12,)
+1.1 = [25.12,)
