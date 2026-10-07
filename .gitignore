@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+settings_local.json
+ihub_parameters.json
+*.pem

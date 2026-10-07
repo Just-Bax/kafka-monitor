@@ -1,0 +1,46 @@
+{
+  "ovAccessKey": "your-access-key",
+  "ovSecretKey": "your-secret-key",
+
+  "kafkaBootstrapServers": "copy from udl_sdtaskmilestones_prod",
+  "kafkaAuthType": "SASL_OAUTH2",
+  "kafkaSecurityProtocol": "SASL_SSL",
+  "kafkaSaslMechanism": "OAUTHBEARER",
+  "kafkaSaslOauthbearerMethod": "oidc",
+  "kafkaSaslOauthbearerClientId": "copy from udl_sdtaskmilestones_prod",
+  "kafkaSaslOauthbearerClientSecret": "copy from udl_sdtaskmilestones_prod",
+  "kafkaSaslOauthbearerTokenEndpointUrl": "copy from udl_sdtaskmilestones_prod",
+  "kafkaSaslOauthbearerScope": "copy from udl_sdtaskmilestones_prod",
+  "kafkaSslCa": "",
+
+  "targets": [
+    {
+      "name": "sdtaskmilestones (slow)",
+      "topic": "kafkaTopic of udl_sdtaskmilestones_prod",
+      "groupId": "kafkaGroupId of udl_sdtaskmilestones_prod"
+    },
+    {
+      "name": "orderingmilestones (baseline)",
+      "topic": "kafkaTopic of udl_orderingmilestones_prod",
+      "groupId": "kafkaGroupId of udl_orderingmilestones_prod"
+    }
+  ],
+
+  "replay": {
+    "batchSize": 1000,
+    "pollTimeout": 5.0,
+    "polls": 30,
+    "maxSeconds": 240
+  },
+
+  "fetchProfiles": {
+    "big_fetch": {
+      "fetch.max.bytes": 104857600,
+      "max.partition.fetch.bytes": 10485760,
+      "queued.max.messages.kbytes": 262144
+    }
+  },
+
+  "runSubscribeTest": true,
+  "adminTimeoutSec": 30
+}
