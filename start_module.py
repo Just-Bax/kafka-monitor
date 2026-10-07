@@ -207,10 +207,11 @@ def group_lag(diag, admin, consumer, topic, group, partitions, timeout):
 
 
 def replay(diag, base, topic, start_offsets, profile_name, overrides, rp):
-    stats_box = {}
+    stats_box = {'all': []}
 
     def on_stats(js):
         stats_box['last'] = js
+        stats_box['all'].append(js)
 
     cfg = dict(base)
     cfg.update({
